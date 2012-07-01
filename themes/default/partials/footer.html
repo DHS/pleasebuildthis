@@ -1,0 +1,37 @@
+
+    </div> <!-- end of #main -->
+
+    <footer class="footer">
+
+        <hr class="soften">
+
+        <p class="float_right">{{ app.config.name }} was created using <a href="http://github.com/DHS/rat">Rat</a></p>
+        <p>
+          {{ app.config.name }} &copy; 2012 &middot;
+          {{ app.link_to('About', 'pages', 'show', 'about') }} &middot;
+          {{ app.link_to('Help', 'pages', 'show', 'help') }} &middot;
+          {{ app.link_to('Search', 'search') }} &middot;
+          {{ app.link_to('API', 'pages', 'show', 'api') }}
+        </p>
+    </footer>
+
+  </div> <!-- end of #container -->
+
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="{{ app.config.base_dir }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+
+  <script src="{{ app.config.base_dir }}js/rat.js"></script>
+  <script src="{{ app.config.base_dir }}js/libs/bootstrap-dropdown.js"></script>
+  <script src="{{ app.config.base_dir }}js/libs/bootstrap-modal.js"></script>
+  <script src="{{ app.config.base_dir }}js/libs/bootstrap-alert.js"></script>
+  <script src="{{ app.config.base_dir }}js/libs/tiny_mce/tiny_mce.js"></script>
+  <script src="{{ app.config.base_dir }}js/libs/humane.js"></script>
+  <script src="{{ app.config.base_dir }}js/plugins.js"></script>
+
+
+  {% if app.plugins.analytics %}
+  {{ app.plugins.analytics.view() }}
+  {% endif %}
+</body>
+</html>

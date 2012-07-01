@@ -1,0 +1,39 @@
+
+<div class="row">
+  <div class="span5 offset3">
+
+  {% if items %}
+    {% for item in items %}
+      {% include 'partials/item.html' %}
+    {% endfor %}
+    {% include 'partials/pagination.html' %}
+  {% else %}
+    <p>No {{ app.config.items.name_plural }} found.</p>
+  {% endif %}
+
+  </div>
+  <div class="span4">
+
+{# Friend buton #}
+{% if app.config.friends.enabled %}
+{% include 'partials/friend.html' %}
+{% endif %}
+
+{% if user.full_name or user.bio or user.url %}
+
+  <h3>Profile</h3>
+
+  <p>
+    {% if user.full_name %}<strong>Name</strong> {{ user.full_name }}{% endif %}
+    {% if user.bio %}<br /><strong>Bio</strong> {{ user.bio }}{% endif %}
+    {% if user.url %}<br /><strong>URL</strong> <a href="{{ user.url }}">{{ user.url }}</a>{% endif %}
+  <p />
+
+{% endif %}
+
+{% if app.plugins.points %}
+{{ app.plugins.points.view() }}
+{% endif %}
+
+  </div>
+</div>

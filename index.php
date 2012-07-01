@@ -1,1 +1,18 @@
-<?php echo "Hello world!"; ?>
+<?php
+
+ob_start();
+
+// Start session
+session_start();
+
+// Load exceptions
+$exceptions = glob('lib/exceptions/*.php');
+foreach ($exceptions as $exception) {
+  include $exception;
+}
+
+require_once 'lib/application.php';
+
+Application::initialise();
+
+while (@ob_end_flush());

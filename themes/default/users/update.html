@@ -1,0 +1,119 @@
+
+<div class="row">
+  <div class="span6 offset3">
+
+    <ul class="nav nav-tabs">
+      <li{% if page == 'profile' %} class="active"{% endif %}>{{ app.link_to('Profile', 'settings', 'profile') }}</li>
+      <li{% if page == 'password' %} class="active"{% endif %}>{{ app.link_to('Password', 'settings', 'password') }}</li>
+      <li{% if page == 'emails' %} class="active"{% endif %}>{{ app.link_to('Emails', 'settings', 'emails') }}</li>
+    </ul>
+
+{% if page == 'password' %}
+
+    <form class="form-horizontal" action="{{ app.url_for('users', 'update', 'password') }}" method="post">
+      <fieldset>
+
+        <legend>Change password</legend>
+
+        <div class="control-group">
+          <label class="control-label" for="old_password">Old password</label>
+          <div class="controls">
+            <input type="password" class="input-xlarge" name="old_password" id="old_password" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="new_password1">New password</label>
+          <div class="controls">
+            <input type="password" class="input-xlarge" name="new_password1" id="new_password1" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="new_password2">New password again</label>
+          <div class="controls">
+            <input type="password" class="input-xlarge" name="new_password2" id="new_password2" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+      </fieldset>
+    </form>
+
+{% elseif page == 'profile'  %}
+
+    <form class="form-horizontal" action="{{ app.url_for('users', 'update', 'profile') }}" method="post">
+      <fieldset>
+
+        <legend>Update profile</legend>
+
+        <div class="control-group">
+          <label class="control-label" for="full_name">Full name</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="full_name" id="full_name" value="{{ user.full_name }}" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="bio">Bio</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="bio" id="bio" value="{{ user.bio }}" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="url">URL</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" name="url" id="url" value="{{ user.url }}{% if user.url is empty %}http://{% endif %}" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+      </fieldset>
+    </form>
+
+{% elseif page == 'emails'  %}
+
+    <form class="form-horizontal" action="{{ app.url_for('users', 'update', 'emails') }}" method="post">
+
+      <input type="hidden" name="submit" value="true" />
+
+      <fieldset>
+
+        <legend>Update email settings</legend>
+
+        <div class="control-group">
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="item_like" id="item_like" {% if user.email_notifications.item_like %}checked="checked"{% endif %}/>
+              Email me when someone likes one of my {{ app.config.items.name_plural }}
+            </label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="item_comment" id="item_comment" {% if user.email_notifications.item_comment %}checked="checked"{% endif %}/>
+              Email me when someone comments on one of my {{ app.config.items.name_plural }}
+            </label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+      </fieldset>
+    </form>
+
+{% endif %}
+
+  </div>
+</div>

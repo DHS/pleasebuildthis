@@ -1,0 +1,34 @@
+
+<legend>Users ({{ users|length }})</legend>
+
+<form class="form-horizontal" action="{{ app.url_for('admin', 'grant_invites') }}" method="get">
+  <div class="control-group">
+    <label class="control-label" for="count">Grant all users invites:</label>
+      <div class="controls">
+        <input type="text" name="count" id="count" class="input-xlarge" value="1" /> <input type="submit" value="Send" class="btn" />
+      </div>
+  </div>
+</form>
+
+{% if users %}
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Credits</th>
+        <th>Last login</th>
+      </tr>
+    </thead>
+    <tbody>
+
+  {% for user in users %}
+
+    <tr><td><a href="/{{ user.username }}; ?>">{{ user.username }}</a></td><td>{{ user.points }}</td><td>{{ user.last_login }}</td></tr>
+
+  {% endfor %}
+
+  </tobdy>
+  </table>
+
+{% endif %}

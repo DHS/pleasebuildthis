@@ -1,0 +1,37 @@
+
+{% if users %}
+
+  <legend>Beta signups ({{ users|length }})</legend>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Signed up</th>
+        <th>Invite</th>
+      </tr>
+    </thead>
+    <tbody>
+
+  {% for user in users %}
+
+      <tr>
+        <td>{{ user.email }}</td>
+        <td>
+          {{ user.days_waiting }} days ago
+        </td>
+        <td>
+          <form action="{{ app.url_for('admin', 'invite') }}" method="post">
+            <input type="hidden" name="email" value="{{ user.email }}">
+            {# Invite summary missing #}
+            <input type="submit" value="Invite" class="btn" />
+          </form>
+        </td>
+      </tr>
+
+  {% endfor %}
+
+    </tbody>
+  </table>
+
+{% endif %}

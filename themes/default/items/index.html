@@ -1,0 +1,44 @@
+{% if not session.user_id %}
+  <p class="lead">{{ app.config.tagline|raw }}</p>
+{% endif %}
+
+{# App is private and user not logged in so show beta signup for #}
+{# Shouldn't this be a redirection to users/add ? #}
+
+{% if app.config.private and not session.user_id %}
+  {% include 'partials/user_add.html' %}
+{% else %}
+  {% if items %}
+
+    <div class="row">
+
+      <div class="span4 offset3">
+        {% for item in items %}
+          {% include 'partials/item.html' %}
+        {% endfor %}
+
+        {% include 'partials/pagination.html' %}
+      </div>
+
+      <div class="span2">
+        {% include 'partials/item_add.html' %}
+      </div>
+
+    </div>
+
+  {% else %}
+
+    <div class="span5 offset3">
+      <p>No {{ app.config.items.name_plural }} found...</p>
+    </div>
+
+    <div class="row">
+      <div class="span2 offset8">
+
+        {% include 'partials/item_add.html' %}
+
+      </div>
+    </div>
+
+  {% endif %}
+{% endif %}

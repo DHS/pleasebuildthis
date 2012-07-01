@@ -1,0 +1,21 @@
+<div id="popup_login" class="modal hide fade">
+
+  <div class="modal-header">
+    <button class="close" data-dismiss="modal">&times;</button>
+    <h3>Login required</h3>
+  </div>
+
+  <div class="modal-body">
+
+    <p>Please login to do that:</p>
+
+    {% include 'partials/sessions_add.html' %}
+
+    <p class="align_center">
+      New to {{ app.config.name }}? <a href="{{ app.url_for('users', 'add') }}{% if app.uri.params.redirect_to %}/redirect_to={{ app.uri.params.redirect_to }}{% endif %}">Signup</a> now!
+      <br />{{ app.link_to('Forgotten your password', 'users', 'reset') }}?
+    </p>
+
+  </div>
+
+</div>

@@ -1,0 +1,51 @@
+
+<div class="row">
+  <div class="span6 offset3">
+
+{% if message %}<p>{{ message }}</p><p>&nbsp;</p>{% endif %}
+
+{% if invites_remaining > 0 %}
+
+  {% include 'partials/invite.html' %}
+
+{% endif %}
+
+{% if invites_sent %}
+
+  <h2>Sent invites</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Email adress</th>
+        <th>Response</th>
+      </tr>
+    </thead>
+    <tbody>
+
+    {% for invite in invites_sent %}
+
+      <tr>
+        <td>{{ invite.email }}</td>
+        <td>
+
+          {% if invite.result > 0 %}
+            <span class="good_news">Accepted</span>
+          {% else %}
+            Still waiting
+          {% endif %}
+
+        </td>
+      </tr>
+
+    {% endfor %}
+
+    </tbody>
+  </table>
+
+{% endif %}
+
+  </div>
+</div>
+
+<p>&nbsp;</p>
