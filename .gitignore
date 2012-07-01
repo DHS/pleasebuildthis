@@ -1,5 +1,4 @@
 # Rat-specific
-config/server.php
 uploads/originals/*
 uploads/stream/*
 uploads/thumbnails/*
