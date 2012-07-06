@@ -159,7 +159,7 @@ class UsersController extends Application {
       // Process reset
 
       // If two passwords submitted then check, otherwise show form
-      if ($_POST['password1'] != '' && $_POST['password2'] != '') {
+      if (isset($_POST['password1']) && $_POST['password1'] != '' && isset($_POST['password2']) && $_POST['password2'] != '') {
 
         if (User::check_password_reset_code($code) == FALSE) {
           exit();
@@ -189,15 +189,15 @@ class UsersController extends Application {
           // Set welcome message
           Application::flash('success', 'Password updated! Welcome back to ' . $this->config->name . '!');
 
-          // If redirect_to is set then redirect
+          // Get redirected
           if (isset($this->uri['params']['redirect_to'])) {
-            header('Location: ' . $this->uri['params']['redirect_to']);
-            exit();
+            $redirect_url = $this->uri['params']['redirect_to']);
+          } else {
+            $redirect_url = $this->config->url;
           }
 
-          // Go forth!
-          header('Location: ' . $this->config->url);
-
+          // Go forth
+          header('Location: ' . $redirect_url);
           exit();
 
         } else {

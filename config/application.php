@@ -46,7 +46,7 @@ class AppConfig extends ServerConfig {
     'content' => array(
       'enabled'     => TRUE,
       'name'        => 'Description',
-      'name_plural'  => 'Descriptions'
+      'name_plural' => 'Descriptions'
     ),
 
     // Remember to update the permissions for your
@@ -107,7 +107,7 @@ class AppConfig extends ServerConfig {
     'analytics' => FALSE
   );
 
-	// Send emails from what address?
-	public $send_emails_from = 'davehs@gmail.com';
+  // Send emails from what address?
+  public $send_emails_from = 'davehs@gmail.com';
 
 }

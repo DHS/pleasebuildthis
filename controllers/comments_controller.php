@@ -14,7 +14,7 @@ class CommentsController extends Application {
 
       $item = Item::get_by_id($_POST['item_id']);
 
-      if (isset($item->user->email_notifications['item_comment'])) {
+      if ($item->user->email_notifications['item_comment']) {
 
         $to       = array('name' => $item->user->username, 'email' => $item->user->email);
         $subject  = '[' . $this->config->name . '] Someone left a ' . strtolower($this->config->items['comments']['name']) . ' on your ' . strtolower($this->config->items['titles']['name']) . ' on ' . $this->config->name . '!';
