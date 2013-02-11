@@ -1,2 +1,3 @@
 web1: 
-php_extensions: [curl,mcrypt,mysqli,mysql]
+php_extensions:
+   - mysqli
