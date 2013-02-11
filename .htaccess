@@ -496,7 +496,7 @@ AddCharset utf-8 .css .js .xml .json .rss .atom
 # reset everything to PHP defaults. Consult www.php.net for more detailed
 # information about setting PHP directives.
 
-php_flag register_globals Off
+#php_flag register_globals Off
 
 # Rename session cookie to something else, than PHPSESSID
 php_value session.name sid
