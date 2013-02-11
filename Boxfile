@@ -1,3 +1,13 @@
-web1: 
-php_extensions:
-   - mysqli
+web1:
+  name: julia
+  shared_writable_dirs:
+    - /uploads/originals
+    - /uploads/stream
+    - /uploads/thumbnails
+  php_version: 5.3.10
+  php_extensions:
+    - mysql
+    - mysqli
+    - pdo_mysql
+    - mcrypt
+    - apc
