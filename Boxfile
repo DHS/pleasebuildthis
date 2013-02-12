@@ -4,6 +4,7 @@ web1:
     - /uploads/originals
     - /uploads/stream
     - /uploads/thumbnails
+    - /static/template_cache
   php_version: 5.3.10
   php_extensions:
     - mysql
