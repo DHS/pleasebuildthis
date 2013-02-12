@@ -3,7 +3,7 @@
 class ServerConfig {
 
 	// URLs - must include http:// and no trailing slash
-	public $url     = 'http://pleasebuildthis.com';
+	public $url     = 'http://pleasebuildthis.pagodabox.com';
 	public $dev_url = 'http://127.0.0.1';
 
 	// Base directory - the directory in which your site resides if not in the server root
