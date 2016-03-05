@@ -12,9 +12,16 @@ Getting started
 ---------------
 
 1. Copy all files to your application directory
-2. Create a MySQL database and run rat.sql in it
-3. Copy config/server-sample.php to config/server.php and update the variables
-4. Visit /admin/setup to configure your application
+2. In the command line, run the following commands in the application directory:
+
+  ```
+  composer install
+  chmod 777 static/template_cache/
+  ````
+
+3. Create a MySQL database and run rat.sql in it
+4. In config/config.json, update the variables under one of the environments (maybe start with local)
+5. Visit /admin/setup to configure your application
 
 Functionality
 -------------
@@ -57,7 +64,7 @@ Functionality
 
 **Themes**
 
-- Default: a basic theme
+- Bootstrap: a basic theme made using [Twitter Bootstrap](http://getbootstrap.com/)
 
 How it works
 ------------
@@ -86,7 +93,12 @@ The typical flow through the app for a given request is as follows:
 Theming Rat
 -----------
 
-To update the look and feel of your application, copy and rename the themes/default directory then update the $theme variable in config/application.php accordingly.
+To update the look and feel of your application, copy and rename the /themes/bootstrap directory then update the $theme variable in config/config.json accordingly.
+
+Environment variables
+---------------------
+
+You can use environment variables to keep your database credentials and encryption salt out of your code. In config/config.json, use ENV:: as a prefix to the config variable name you'd like to load ie. change the dev database host value to ENV::MYSQL_HOST to load the MYSQL_HOST environment variable.
 
 On the shoulders of giants
 --------------------------

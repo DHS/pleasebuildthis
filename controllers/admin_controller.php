@@ -2,7 +2,8 @@
 
 class AdminController extends Application {
 
-  protected $requireAdmin = array('index', 'signups', 'users', 'history', 'invite', 'grant_invites');
+  protected $requireAdmin = array('index', 'signups', 'users', 'history',
+    'invite', 'grant_invites');
 
   // Show admin dashboard
   function index() {
@@ -10,94 +11,27 @@ class AdminController extends Application {
     $users = Admin::list_users();
     $users_beta = Admin::list_users_beta();
 
-    $this->loadView('admin/index', array('users' => $users, 'users_beta' => $users_beta), 'admin');
+    $this->loadView('admin/index',
+      array('users' => $users, 'users_beta' => $users_beta), 'admin');
 
   }
 
   // Show app config
   function config() {
 
-    $conf = get_object_vars($this->config);
-
     if ($_POST) {
 
-      // Pull post vars into $conf array
-
-      foreach ($_POST as $key => $value) {
-        $conf[$key] = $value;
-      }
-
-      // Overwrite checkbox fields
-      //$checkboxes = array('beta', 'private', 'items\'][\'titles\'][\'enabled', 'items["content"]["enabled"]', 'items["uploads"]["enabled"]', 'items["comments"]["enabled"]', 'items["likes"]["enabled"]');
-      $checkboxes = array(
-        'beta', 'private', 'signup_email_notifications'
-      );
-
-      foreach ($checkboxes as $key => $checkbox) {
-
-        if (isset($_POST[$checkbox]) && $_POST[$checkbox] == 'on') {
-          $conf[$checkbox] = 'TRUE';
-        } else {
-          $conf[$checkbox] = 'FALSE';
-        }
-      }
-
-      if (isset($_POST['items']['titles']['enabled']) && $_POST['items']['titles']['enabled'] == 'on') {
-        $conf['items']['titles']['enabled'] = 'TRUE';
-      } else {
-        $conf['items']['titles']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['items']['content']['enabled']) && $_POST['items']['content']['enabled'] == 'on') {
-        $conf['items']['content']['enabled'] = 'TRUE';
-      } else {
-        $conf['items']['content']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['items']['uploads']['enabled']) && $_POST['items']['uploads']['enabled'] == 'on') {
-        $conf['items']['uploads']['enabled'] = 'TRUE';
-      } else {
-        $conf['items']['uploads']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['items']['comments']['enabled']) && $_POST['items']['comments']['enabled'] == 'on') {
-        $conf['items']['comments']['enabled'] = 'TRUE';
-      } else {
-        $conf['items']['comments']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['items']['likes']['enabled']) && $_POST['items']['likes']['enabled'] == 'on') {
-        $conf['items']['likes']['enabled'] = 'TRUE';
-      } else {
-        $conf['items']['likes']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['invites']['enabled']) && $_POST['invites']['enabled'] == 'on') {
-        $conf['invites']['enabled'] = 'TRUE';
-      } else {
-        $conf['invites']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['friends']['enabled']) && $_POST['friends']['enabled'] == 'on') {
-        $conf['friends']['enabled'] = 'TRUE';
-      } else {
-        $conf['friends']['enabled'] = 'FALSE';
-      }
-
-      if (isset($_POST['friends']['asymmetric']) && $_POST['friends']['asymmetric'] == 'on') {
-        $conf['friends']['asymmetric'] = 'TRUE';
-      } else {
-        $conf['friends']['asymmetric'] = 'FALSE';
-      }
+      // Use the config lib to convert $_POST into something writable
+      $conf = Config::prepareConfigToWrite($_POST);
 
       // Update config
-      $this->writeConfig('application', $conf);
+      Config::writeConfig($conf);
 
       // Set flash message
       Application::flash('success', 'App config updated!');
 
       // Force redirect to reload app with new config
-      header('Location: /admin/config');
+      header('Location: ' . $_SERVER['HTTP_REFERER']);
       exit();
 
     }

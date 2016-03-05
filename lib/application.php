@@ -1,27 +1,20 @@
 <?php
 
+use Aws\S3\S3Client;
+use Aws\S3\Exception\S3Exception;
+
 class Application {
 
-  public $uri, $config;
-
-  private function __construct() {}
+  public $uri, $config, $s3;
 
   public static function initialise() {
 
-    // Check for server config
-    if ( ! file_exists('config/server.php')) {
-      throw new ApplicationException(null, "Server config doesn't exist yet. Copy config/server-sample.php to config/server.php and update the variables.");
-    }
-
-    require_once 'config/server.php';
-    require_once 'config/application.php';
-    $config = new AppConfig;
-
-    require_once 'lib/routing.php';
+    require_once 'vendor/autoload.php';
 
     try {
 
-      $uri = Routing::fetch_uri($config);
+      require_once 'lib/routing.php';
+      $uri = Routing::fetch_uri();
 
       $controller = ucfirst($uri['controller']) . 'Controller';
       @include "controllers/{$uri['controller']}_controller.php";
@@ -44,14 +37,15 @@ class Application {
         $uri = Routing::route();
 
         $controller = ucfirst($uri['controller']) . 'Controller';
-        @include "controllers/{$uri['controller']}_controller.php";
+        include "controllers/{$uri['controller']}_controller.php";
 
         $app = new $controller;
 
       }
 
-      $app->loadConfig($config);
+      $app->loadConfig();
       $app->loadTwig();
+      $app->loadAws();
       $app->loadModels();
       $app->loadPlugins();
 
@@ -87,7 +81,6 @@ class Application {
       // RoutingExceptions only thrown from static context
       // so must set up new Application before rendering 404
       $app = new Application;
-      $app->loadConfig($config);
       $app->loadView('pages/404');
 
     } catch (ApplicationException $e) {
@@ -99,53 +92,26 @@ class Application {
 
   }
 
-  private function loadConfig($config) {
-
-    $this->config = $config;
-
-    // Work out the live domain from config
-    $domain = substr($this->config->url, 7);
-
-    // Determine if site is live or dev, set site_identifier constant and base_dir
-    if ($_SERVER['HTTP_HOST'] == $domain || $_SERVER['HTTP_HOST'] == 'www.' . $domain) {
-      define('SITE_IDENTIFIER', 'live');
-      $base_dir = $this->config->base_dir;
-    } else {
-      define('SITE_IDENTIFIER', 'dev');
-      $base_dir = $this->config->dev_base_dir;
-    }
-
-    // Add trailing slash if necessary
-    if (substr($base_dir, -1) != '/') {
-      $base_dir = $base_dir.'/';
-    }
-
-    // Set base_dir constant
-    $this->config->base_dir = $base_dir;
-
-    // Remove this eventually
-    define('BASE_DIR', $base_dir);
-
-    // Update config->url and append base_dir
-    if (SITE_IDENTIFIER == 'live') {
-      $this->config->url .= $base_dir;
-    } else {
-      $this->config->url = $this->config->dev_url . $base_dir;
-    }
-
+  /**
+   * Set up config
+   */
+  public function loadConfig() {
+    require_once 'models/config.php';
+    $this->config = new Config();
   }
 
-  private function loadTwig() {
+  /**
+   * Initialise Twig
+   */
+  public function loadTwig() {
 
     $twig_config['cache'] = 'static/template_cache';
 
     // If we're in dev mode then force template compiling
-    if (SITE_IDENTIFIER == 'dev') {
+    if ($this->config->site_identifier == 'dev') {
       $twig_config['auto_reload'] = TRUE;
     }
 
-    require_once 'lib/Twig/Autoloader.php';
-    Twig_Autoloader::register();
     $this->twig = new Twig_Environment(new Twig_Loader_Filesystem('themes/' . $this->config->theme), $twig_config);
 
     // Load a separate instance of twig to handle strings
@@ -153,16 +119,19 @@ class Application {
 
   }
 
-  public function writeConfig($file, $settings = array()) {
+  /**
+   * Initialise AWS
+   */
+  public function loadAws() {
 
-    $config_file = $this->twig_string->render(file_get_contents("config/$file.twig"), array('app' => array('config' => $settings)));
-
-    $handle = fopen("config/$file.php", 'w');
-    fwrite($handle, $config_file);
-    fclose($handle);
+    // Instantiate an S3 client
+    $this->s3 = S3Client::factory();
 
   }
 
+  /**
+   * Initialise all the models in the /models folder
+   */
   private function loadModels() {
 
     global $mysqli;
@@ -176,10 +145,13 @@ class Application {
 
   }
 
+  /**
+   * Initialise all the plugins in the /plugins folder
+   */
   private function loadPlugins() {
 
     $this->plugins = new StdClass();
-    foreach ($this->config->plugins as $key => $value) {
+    foreach ((array)$this->config->plugins as $key => $value) {
       if ($value == TRUE) {
         require_once "plugins/$key.php";
         $this->plugins->$key = new $key;
@@ -188,6 +160,9 @@ class Application {
 
   }
 
+  /**
+   * Apply url filters
+   */
   private function runFilters() {
 
     $uri = $this->uri;
@@ -202,14 +177,21 @@ class Application {
 
   }
 
+  /**
+   * Initialise all default libs
+   */
   private function loadDefaultLibs() {
 
     require_once 'lib/content.php';
+    require_once 'lib/mysql.php';
     require_once 'lib/email.php';
     $this->email = new Email($this);
 
   }
 
+  /**
+   * Runs the appropriate method in the controller
+   */
   private function loadAction() {
 
     // Check for params
@@ -243,6 +225,9 @@ class Application {
 
   }
 
+  /**
+   * Renders the Twig template for the given view
+   */
   protected function loadView($view, $params = array(), $layout = 'default') {
 
     // Note: the following is hardcoded in ajax methods
@@ -266,37 +251,57 @@ class Application {
 
   }
 
+  /**
+   * Generate a url for a given controller/action/id
+   */
   public static function url_for($controller, $action = '', $id = '', $params = array()) {
     return Routing::url_for($controller, $action, $id, $params);
   }
 
-  // url_for wrapper for use with Twig
+  /**
+   * Echo a url for a given controller/action/id
+   */
   public function echo_url_for($controller, $action = '', $id = '', $params = array()) {
     echo $this->url_for($controller, $action, $id, $params);
   }
 
+  /**
+   * Generate a url for a given route
+   */
   public function url_for_route($route, array $params) {
 
     foreach ($params as $param) {
       $route = implode($param, explode('*', $route, 2));
     }
 
-    return substr(BASE_DIR, 0, -1) . $route;
+    return substr($this->config->base_dir, 0, -1) . $route;
 
   }
 
+  /**
+   * Echos an html link for a given controller/action/id
+   */
   public function link_to($link_text, $controller, $action = '', $id = '', $params = array()) {
     echo '<a href="' . $this->url_for($controller, $action, $id, $params) . '">' . $link_text . '</a>';
   }
 
+  /**
+   * Return an html link for a given controller/action/id
+   */
   public function get_link_to($link_text, $controller, $action = '', $id = '', $params = array()) {
     return '<a href="' . $this->url_for($controller, $action, $id, $params) . '">' . $link_text . '</a>';
   }
 
+  /**
+   * Redirect to a given controller/action/id
+   */
   public function redirect_to($controller, $action = '', $id = '', $params = array()) {
     header('Location: ' . $this->url_for($controller, $action, $id, $params));
   }
 
+  /**
+   * Add a flash message to the session, probably to be shown on the next page
+   */
   public static function flash($category, $message) {
 
     if ( ! in_array($category, array('error', 'notice', 'success'))) {
@@ -307,6 +312,9 @@ class Application {
 
   }
 
+  /**
+   * Render a json object when returning API objects
+   */
   public function render_json($ref) {
 
     if (is_array($ref)) {

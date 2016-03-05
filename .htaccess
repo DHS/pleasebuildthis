@@ -171,25 +171,25 @@ AddType text/x-vcard                        vcf
 
   # HTML, TXT, CSS, JavaScript, JSON, XML, HTC:
   <IfModule filter_module>
-    FilterDeclare   COMPRESS
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/html
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/css
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/plain
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/xml
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/x-component
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/javascript
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/json
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/xml
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/xhtml+xml
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/rss+xml
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/atom+xml
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/vnd.ms-fontobject
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $image/svg+xml
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $image/x-icon
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/x-font-ttf
-    FilterProvider  COMPRESS  DEFLATE resp=Content-Type $font/opentype
-    FilterChain     COMPRESS
-    FilterProtocol  COMPRESS  DEFLATE change=yes;byteranges=no
+    #FilterDeclare   COMPRESS
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/html
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/css
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/plain
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/xml
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $text/x-component
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/javascript
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/json
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/xml
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/xhtml+xml
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/rss+xml
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/atom+xml
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/vnd.ms-fontobject
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $image/svg+xml
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $image/x-icon
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $application/x-font-ttf
+    #FilterProvider  COMPRESS  DEFLATE resp=Content-Type $font/opentype
+    #FilterChain     COMPRESS
+    #FilterProtocol  COMPRESS  DEFLATE change=yes;byteranges=no
   </IfModule>
 
   <IfModule !mod_filter.c>
@@ -323,7 +323,7 @@ FileETag None
 # FollowSymLinks must be enabled for this to work.
 
 <IfModule mod_rewrite.c>
-  Options +FollowSymlinks
+  #Options +FollowSymlinks
   RewriteEngine On
 </IfModule>
 
@@ -412,7 +412,7 @@ FileETag None
 # without -MultiViews, Apache will give a 404 for a rewrite if a folder of the same name does not exist
 #   e.g. /blog/hello : webmasterworld.com/apache/3808792.htm
 
-Options -MultiViews
+#Options -MultiViews
 
 
 
@@ -452,7 +452,7 @@ AddCharset utf-8 .css .js .xml .json .rss .atom
 # Usually you should leave this activated, because you shouldn't allow everybody to surf through
 # every folder on your server (which includes rather private places like CMS system folders).
 <IfModule mod_autoindex.c>
-  Options -Indexes
+  #Options -Indexes
 </IfModule>
 
 
@@ -496,10 +496,10 @@ AddCharset utf-8 .css .js .xml .json .rss .atom
 # reset everything to PHP defaults. Consult www.php.net for more detailed
 # information about setting PHP directives.
 
-#php_flag register_globals Off
+# php_flag register_globals Off
 
 # Rename session cookie to something else, than PHPSESSID
-#php_value session.name sid
+# php_value session.name sid
 
 # Do not show you are using PHP
 # Note: Move this line to php.ini since it won't work in .htaccess
@@ -538,5 +538,5 @@ AddCharset utf-8 .css .js .xml .json .rss .atom
 
 # Increase cookie security
 <IfModule php5_module>
-  #php_value session.cookie_httponly true
+  # php_value session.cookie_httponly true
 </IfModule>

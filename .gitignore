@@ -1,5 +1,5 @@
 # Rat-specific
-config/server.php
+config/config.json
 uploads/originals/*
 uploads/stream/*
 uploads/thumbnails/*
@@ -92,6 +92,7 @@ static/template_cache/*
 !uploads/stream/web.jpeg
 !uploads/thumbnails/web.jpeg
 
+vendor/
 
 # Numerous always-ignore extensions
 *.diff

@@ -2,7 +2,7 @@
 
 class Routing extends Application {
 
-  public static function fetch_uri($config) {
+  public static function fetch_uri() {
 
     // Get request from server, split into segments, store as controller,
     // view, id and params
@@ -43,7 +43,7 @@ class Routing extends Application {
 
     // Set the controller to the default if not in URI
     if (empty($uri['controller'])) {
-      $uri['controller'] = $config->default_controller;
+      $uri['controller'] = 'items';
     }
 
     return $uri;
@@ -222,7 +222,8 @@ class Routing extends Application {
 
     }
 
-    return BASE_DIR . $route;
+    $config = new Config;
+    return $config->url . $route;
 
   }
 

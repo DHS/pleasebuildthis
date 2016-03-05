@@ -1,0 +1,37 @@
+{
+    "environments": {
+        "local": {
+            "url"         : "http://127.0.0.1",
+            "base_dir"    : "/rat",
+            "database": {
+                "host"     : "localhost",
+                "username" : "root",
+                "password" : "",
+                "database" : "rat",
+                "prefix"   : ""
+            }
+        },
+        "staging": {
+            "url"         : "http://my-rat-app-staging.herokuapp.com",
+            "base_dir"    : "/",
+            "database": {
+                "host"     : "localhost",
+                "username" : "root",
+                "password" : "",
+                "database" : "rat",
+                "prefix"   : ""
+            }
+        },
+        "live": {
+            "url"         : "http://my-rat-app.herokuapp.com",
+            "base_dir"    : "/",
+            "database": {
+                "host"     : "localhost",
+                "username" : "root",
+                "password" : "",
+                "database" : "rat",
+                "prefix"   : ""
+            }
+        }
+    }
+}
