@@ -18,7 +18,7 @@
                 "host"     : "ENV::MYSQL_HOST",
                 "username" : "ENV::MYSQL_USERNAME",
                 "password" : "ENV::MYSQL_PASSWORD",
-                "database" : "ENV::MYSQL_DB_NAME",
+                "database" : "ENV::MYSQL_DATABASE",
                 "prefix"   : ""
             }
         },
