@@ -12,13 +12,13 @@
             }
         },
         "staging": {
-            "url"         : "http://my-rat-app-staging.herokuapp.com",
+            "url"         : "http://pleasebuildthis-staging.herokuapp.com",
             "base_dir"    : "/",
             "database": {
-                "host"     : "localhost",
-                "username" : "root",
-                "password" : "",
-                "database" : "rat",
+                "host"     : "ENV::MYSQL_HOST",
+                "username" : "ENV::MYSQL_USERNAME",
+                "password" : "ENV::MYSQL_PASSWORD",
+                "database" : "ENV::MYSQL_DB_NAME",
                 "prefix"   : ""
             }
         },
