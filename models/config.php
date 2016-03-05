@@ -29,42 +29,28 @@ class Config {
     // putenv('AWS_SECRET_ACCESS_KEY=123');
     // putenv('AWS_S3_BUCKET=rat-uploads');
 
-    // Load database config from config.json
-    self::fillObject($this, $this->loadDbConfigFile());
+    $envConfig = $this->loadEnvConfigFile();
 
-    // Determine environment
-    $this->processConfigBeforeDb();
+    // Add environment config to $this
+    self::fillObject($this, $envConfig);
+
+    // Determine which environment we're in
+    $this->processEnvConfig();
 
     // Load application config from database
-    self::fillObject($this, $this->loadConfigFromDb());
+    $dbConfig = $this->loadConfigFromDb();
 
-    // Determine environment
-    $this->processConfigAfterDb();
+    // Add config from database to $this
+    self::fillObject($this, $dbConfig);
 
-  }
+    $this->processConfig();
 
-  /**
-   * Convert an array to an object, return the object
-   */
-  static public function array_to_object($array) {
-    // Casting input means you can actually pass in objects too
-    $array = (array)$array;
-
-    // Loop through array checking if values are arrays and converting those too
-    foreach ($array as $key => $value) {
-      if (is_array($value)) {
-        $array[$key] = self::array_to_object($value);
-      }
-    }
-
-    // Finally, cast top level to object and return
-    return (object)$array;
   }
 
   /**
    * Load a config file
    */
-  private function loadDbConfigFile() {
+  private function loadEnvConfigFile() {
 
     $config_contents = file_get_contents($this->_config_path);
 
@@ -87,35 +73,10 @@ class Config {
   }
 
   /**
-   * Overwrite an old object with properties from a new object
+   * Process environment config
+   * Determines which environment we're in
    */
-  public static function fillObject($old_object, $new_object = null) {
-
-    if ($new_object != null) {
-
-      $new_object = self::array_to_object($new_object);
-
-      // Set new attributes on old object
-      foreach ($new_object as $key => $value) {
-        $old_object->$key = $value;
-      }
-
-      if ($old_object != $this) {
-        return $old_object;
-      }
-
-    } else {
-
-      // No new object given so create an object from the old one
-      return self::array_to_object($old_object);
-
-    }
-  }
-
-  /**
-   * Process config file setting up some extra config settings
-   */
-  private function processConfigBeforeDb() {
+  private function processEnvConfig() {
 
     try {
 
@@ -156,26 +117,53 @@ class Config {
         config.json.');
       }
 
-    } catch (Exception $e) {}
-
-    // Add trailing slash if necessary
-    if (substr($this->base_dir, -1) != '/') {
-      $this->base_dir = $this->base_dir.'/';
-    }
-
-    // Update config->url and append base_dir
-    if ($this->site_identifier == 'live') {
-      $this->url .= $this->base_dir;
-    } else {
-      $this->url = $this->dev_url . $this->base_dir;
+    } catch (Exception $e) {
+      // Application hasn't loaded yet so pretty error messages won't work
+      echo $e->getMessage();
+      exit;
     }
 
   }
 
   /**
-   * Process config file setting up some extra config settings
+   * Fetch config from database
    */
-  private function processConfigAfterDb() {
+  public function loadConfigFromDb() {
+
+    global $mysqli;
+
+    // Load own mysql connection as config is often loaded statically
+    $db = $this->environments->{$this->site_identifier}->database;
+
+    // Create database connection
+    $mysqli = new mysqli(
+      $db->host,
+      $db->username,
+      $db->password,
+      $db->database
+    );
+
+    $sql = "SELECT * FROM `{$this->environments->{$this->site_identifier}->database->prefix}config` WHERE `id` = 1";
+
+    $query = mysqli_query($mysqli, $sql);
+    $result = mysqli_fetch_array($query, MYSQL_ASSOC);
+
+    $conf = new stdClass();
+    foreach ((array)$result as $key => $value) {
+      if (is_object(json_decode($value)) == true) {
+        $conf->$key = json_decode($value);
+      } else {
+        $conf->$key = $value;
+      }
+    }
+
+    return $conf;
+  }
+
+  /**
+   * Extra config processing
+   */
+  private function processConfig() {
 
     // Check encryption salt for environment variables
     $config_value_array = explode($this->_env_var_prefix, $this->encryption_salt);
@@ -197,6 +185,15 @@ class Config {
     // Create array of upload mime types
     $this->items->uploads->mime_types = explode(',', $this->items->uploads->mime_types);
 
+    // Add trailing slash to base_dir if necessary
+    if (substr($this->base_dir, -1) != '/') {
+      $this->base_dir .= '/';
+    }
+
+    // Set site url
+    $this->url = $this->environments->{$this->site_identifier}->url;
+    $this->url .= $this->base_dir;
+
   }
 
   /**
@@ -209,9 +206,6 @@ class Config {
 
     // Convert posted conf to object
     $posted_conf = self::array_to_object($posted_conf);
-
-    // Escape tagline
-    $posted_conf->tagline = addslashes($posted_conf->tagline);
 
     // Setup new config
     $conf = self::fillObject($conf, $posted_conf);
@@ -260,54 +254,109 @@ class Config {
   }
 
   /**
-   * Write config.json
+   * Write config
    */
-  public function writeConfig($settings) {
-
-    $config_file = $this->twig_string->render(
-      file_get_contents("config/config.twig"),
-      array('app' => array('config' => $settings))
-    );
-
-    $handle = fopen('config/config.json', 'w');
-    fwrite($handle, $config_file);
-    fclose($handle);
-
-  }
-
-  /**
-   * Fetch config from database
-   */
-  public function loadConfigFromDb() {
+  public function writeConfig($newConfig) {
 
     global $mysqli;
 
-    // Load own mysql connection as config is often loaded statically
-    $db = $this->environments->{$this->site_identifier}->database;
+    // Escape strings
+    $newConfig = $this->escapeStrings($newConfig);
 
-    // Create database connection
-    $mysqli = new mysqli(
-      $db->host,
-      $db->username,
-      $db->password,
-      $db->database
-    );
+    // Fix checkboxes
+    $newConfig = $this->prepareConfigToWrite($newConfig);
 
-    $sql = "SELECT * FROM `{$this->environments->{$this->site_identifier}->database->prefix}config` WHERE `id` = 1";
+    $items = "'" . json_encode($newConfig->items) . "'";
+    $invites = "'" . json_encode($newConfig->invites) . "'";
+    $friends = "'" . json_encode($newConfig->friends) . "'";
+    $plugins = "'" . json_encode($newConfig->plugins) . "'";
+
+    // Build query
+    $sql = "UPDATE `{$config->database->{$config->site_identifier}->prefix}config` SET ";
+    $sql .= "`name` = '$newConfig->name', ";
+    $sql .= "`tagline` = '$newConfig->tagline', ";
+    $sql .= "`beta` = $newConfig->beta, ";
+    $sql .= "`private` = $newConfig->private, ";
+    $sql .= "`signup_email_notifications` = $newConfig->signup_email_notifications, ";
+    $sql .= "`items` = $items, ";
+    $sql .= "`timezone` = '$newConfig->timezone', ";
+    $sql .= "`invites` = $invites, ";
+    $sql .= "`friends` = $friends, ";
+    $sql .= "`theme` = '$newConfig->theme', ";
+    $sql .= "`plugins` = $plugins, ";
+    $sql .= "`send_emails` = $newConfig->send_emails ";
+    $sql .= "WHERE id = 1;";
 
     $query = mysqli_query($mysqli, $sql);
-    $result = mysqli_fetch_array($query, MYSQL_ASSOC);
 
-    $conf = new stdClass();
-    foreach ((array)$result as $key => $value) {
-      if (is_object(json_decode($value)) == true) {
-        $conf->$key = json_decode($value);
-      } else {
-        $conf->$key = $value;
+  }
+
+  public function escapeStrings($newConfig) {
+
+    $strings = array(
+      'name',
+      'name_plural',
+      'tagline',
+      'content',
+      'past_tense'
+    );
+
+    // Loop through new config
+    foreach ($newConfig as $key => &$value) {
+      if (is_array($value)) {
+        // If the value is an array then recurse!
+        $value = self::escapeStrings($value);
+      } elseif (in_array($key, $strings)) {
+        // If it's a string then escape it
+        $value = sanitize_input($value, true);
       }
     }
 
-    return $conf;
+    return $newConfig;
+  }
+
+  /**
+   * Overwrite an old object with properties from a new object
+   */
+  public static function fillObject($old_object, $new_object = null) {
+
+    if ($new_object != null) {
+
+      $new_object = self::array_to_object($new_object);
+
+      // Set new attributes on old object
+      foreach ($new_object as $key => $value) {
+        $old_object->$key = $value;
+      }
+
+      if ($old_object != $this) {
+        return $old_object;
+      }
+
+    } else {
+
+      // No new object given so create an object from the old one
+      return self::array_to_object($old_object);
+
+    }
+  }
+
+  /**
+   * Convert an array to an object, return the object
+   */
+  static public function array_to_object($array) {
+    // Casting input means you can actually pass in objects too
+    $array = (array)$array;
+
+    // Loop through array checking if values are arrays and converting those too
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        $array[$key] = self::array_to_object($value);
+      }
+    }
+
+    // Finally, cast top level to object and return
+    return (object)$array;
   }
 
 }
