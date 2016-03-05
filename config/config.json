@@ -2,12 +2,12 @@
     "environments": {
         "local": {
             "url"         : "http://127.0.0.1",
-            "base_dir"    : "/rat",
+            "base_dir"    : "/pleasebuidthis",
             "database": {
                 "host"     : "localhost",
                 "username" : "root",
                 "password" : "",
-                "database" : "rat",
+                "database" : "pleasebuildthis",
                 "prefix"   : ""
             }
         },
@@ -23,13 +23,13 @@
             }
         },
         "live": {
-            "url"         : "http://my-rat-app.herokuapp.com",
+            "url"         : "http://pleasebuildthis.com",
             "base_dir"    : "/",
             "database": {
-                "host"     : "localhost",
-                "username" : "root",
-                "password" : "",
-                "database" : "rat",
+                "host"     : "ENV::MYSQL_HOST",
+                "username" : "ENV::MYSQL_USERNAME",
+                "password" : "ENV::MYSQL_PASSWORD",
+                "database" : "ENV::MYSQL_DATABASE",
                 "prefix"   : ""
             }
         }
