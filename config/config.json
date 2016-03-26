@@ -23,7 +23,7 @@
             }
         },
         "live": {
-            "url"         : "http://www.pleasebuildthis.com",
+            "url"         : "http://pleasebuildthis.com",
             "base_dir"    : "/",
             "database": {
                 "host"     : "ENV::MYSQL_HOST",
